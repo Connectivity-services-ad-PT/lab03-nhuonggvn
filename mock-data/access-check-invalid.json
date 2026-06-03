@@ -1,0 +1,7 @@
+{
+  "requestId": "invalid-uuid-format",
+  "cardId": "CARD-INVALID-12345",
+  "gateId": "GATE-INVALID",
+  "direction": "UNKNOWN",
+  "timestamp": "2026-06-01-no-time-zone"
+}

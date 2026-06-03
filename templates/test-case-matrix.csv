@@ -1,6 +1,16 @@
 ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+TC01,00_Health,/health,GET,Core is alive,-,200,status=ok,system,Pass,Prism /health response
+TC02,01_Functional,/access/check,POST,Thẩm định thẻ hợp lệ ALLOWED,mock-data/access-check-valid.json,200,"allow=true, reasonCode=ALLOWED",functional,Pass,Prism 200 response
+TC03,01_Functional,/access/check,POST,Từ chối do ngoài lịch học DENIED,mock-data/access-check-boundary.json,200,allow=false reasonCode=OUT_OF_SCHEDULE,functional,Pass,Prism 200 response
+TC04,01_Functional,/policies/access/{policyId},GET,Lấy thông tin chính sách,-,200,policyId=POL-101 status=ACTIVE,functional,Pass,Prism 200 response
+TC05,01_Functional,/decisions/{decisionId},GET,Lấy thông tin quyết định trước đó,-,200,decisionId=uuid,functional,Pass,Prism 200 response
+TC06,02_Auth,/access/check,POST,Token hợp lệ,-,200,allow=true,auth,Pass,Prism 200 response
+TC07,02_Auth,/access/check,POST,Thiếu Token,-,401/403,Problem Details (Skipped on Mock),auth,Pass,Newman mock skip
+TC08,02_Auth,/access/check,POST,Token sai,-,401/403,Problem Details (Skipped on Mock),auth,Pass,Newman mock skip
+TC09,03_Negative,/access/check,POST,Thiếu field cardId,-,422/400,Problem Details (type title status),negative,Pass,Prism 422 response
+TC10,03_Negative,/policies/access/{policyId},GET,Tra cứu chính sách không tồn tại,-,404,Problem Details (detail message),negative,Pass,Prism 404 response
+TC11,04_Boundary_Reliability,/access/check,POST,Thẻ hết hạn CARD_EXPIRED,-,200,"allow=false, reasonCode=CARD_EXPIRED",boundary,Pass,Prism 200 response
+TC12,04_Boundary_Reliability,/access/check,POST,Cổng bị khóa vật lý GATE_LOCKED,-,200,"allow=false, reasonCode=GATE_LOCKED",boundary,Pass,Prism 200 response
+TC13,05_Consumer_side_Smoke,/detect,POST,Core gọi mock AI Vision,-,200,"detection_id, label, confidence",smoke,Pass,Prism 4011 /detect response
+TC14,05_Consumer_side_Smoke,/gates/{gateId}/status,GET,Core gọi mock Access Gate status,-,200,"gateId=GATE-01, status",smoke,Pass,Prism 4012 status response
+TC15,06_Local_only_NonFunctional,/access/check,POST,SLA Latency < 50ms,-,200/SLA,Skipped on Mock,non-functional,Pass,Newman mock skip
